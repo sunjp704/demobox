@@ -1,0 +1,22 @@
+a
+a
+a
+b
+a
+a
+c
+
+max_dom
+parent_id      =  1,2,3,4,
+parent_grid_ratio   =  12345
+i_parent_start
+j_parent_start
+e_we
+s_sn
+dx
+dy
+ref_lat
+ref_lon
+truelat1
+truelat2
+stand_lon

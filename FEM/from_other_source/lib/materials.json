@@ -1,0 +1,40 @@
+{
+    "Steel": {
+        "Q355": {
+            "Density": 7850,
+            "ModulusOfElastisity": 2.060E11,
+            "Poisson": 0.3,
+            "CoefficientOfThermalExpansion": 1.200E-5,
+            "ShearModulus": 7.923E10,
+            "YieldStress": 3.55E8,
+            "TensileStress": 4.70E8
+        },
+        "Q390": {
+            "Density": 1,
+            "MpdulusOfElastisity": 1,
+            "Poisson": 1,
+            "CoefficientOfThermalExpansion": 1,
+            "ShearModulus": 1,
+            "YieldStress": 1,
+            "TensileStress": 1
+        }
+    },
+    "Concrete": {
+        "C30": {
+            "Density": 2550,
+            "ModulusOfElastisity": 3.000E11,
+            "Poisson": 0.2,
+            "CoefficientOfThermalExpansion": 1.000E-5,
+            "ShearModulus": 1.250E10,
+            "CharacteristicCompressiveStrength": 2.010E8
+        },
+        "C40": {
+            "Density": 1,
+            "MpdulusOfElastisity": 3.1,
+            "Poisson": 1,
+            "CoefficientOfThermalExpansion": 1,
+            "ShearModulus": 1,
+            "CharacteristicCompressiveStrength": 1
+        }
+    }
+}
