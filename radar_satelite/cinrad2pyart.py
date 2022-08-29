@@ -1,16 +1,14 @@
 """
 Utilities for reading CINRAD files and transfering to Py-art class Radar
 """
+from curses import meta
 import numpy as np
-from pyart.core.radar import Radar
+import pyart
 import re
 import json
 import bz2
 
-with open('station.json', 'r') as f:
-    station_info = json.load(f)
-
-
+# get file raw data
 def _get_raw(filename):
     with open(filename,'rb') as f:
         raw=f.read()
@@ -19,8 +17,15 @@ def _get_raw(filename):
     return raw
 
 
-
-def _get_station_info(filename: str):
+# parse file name
+def _get_file_info(filename: str,user_defined_file_info:bool=False,station_id=None,scan_time=None,radar_band=None):
+    if user_defined_file_info:
+        try:
+            if station_id is None or scan_time is None or radar_band is None:
+                raise ValueError('file info is None.')
+        except ValueError as e:
+            print(e)
+        return station_id, scan_time, radar_band
     # Z_RADR_I_Z9250_20160701001000_O_DOR_SA_CAP.bin.bz2
     # find and return station name, data type, scan time
     re_station_id = r'_Z\d{4}_'
@@ -31,7 +36,7 @@ def _get_station_info(filename: str):
         scan_time = re.findall(re_scan_time, filename)[0][1:-1]
         radar_band = re.findall(re_radar_band, filename)[0][1:-1]
     except:
-        print('Failed parsing station info, check your file name.\n')
+        print('Failed parsing file info, check your file name.\n')
     return station_id, scan_time, radar_band
 
 
@@ -59,13 +64,75 @@ def _SA_SB_decoder(byte_data:bytes):
     except Exception as e:
         print('Failed decoding: ', e)
     except:
-        print('Failed decoding: check your format')
+        print('Failed decoding: check your format.')
     return data
 
+# create pyart Radar object
 def cinrad2pyart(filename: str):
-    station_id, scan_time, radar_band=_get_station_info()
+    station_id, scan_time, radar_band=_get_file_info()
+    with open('station.json', 'r') as f:
+        station_info = json.load(f)
+
+    station_name=station_info[station_id][0]
+    station_longitude=station_info[station_id][1]
+    station_latitude=station_info[station_id][2]
+    station_altitude=station_info[station_id][4]
+    try:
+        if radar_band is not station_info[station_id][3]:
+            raise Exception('radar_band in filename is different from staion.json.')
+    except Exception as e:
+        print(e)
+
+    filemetadata=pyart.config.FileMetadata('cinrad_SA_SB')
+    
+    time=filemetadata('time')
+    time['units'] = 'seconds_since_197001010000'
+    time['calendar'] = 'standard'
+    time['comment'] = 'UTC'
+    time['data'] = scan_time
+
+    _range=filemetadata('range')
+    # _range['data] = todo
+
+    metadata=filemetadata('metadata')
+    metadata['instrument_name']='CINRAD'
+
+    scan_type='ppi'
+
+    longitude=filemetadata('longitude')
+    longitude['data']=station_longitude
+    latitude = filemetadata('latitude')
+    latitude['data']=station_latitude
+    altitude=filemetadata('altitude')
+    altitude['data']=station_altitude
+    sweep_number=filemetadata('sweep_number')
+    sweep_mode = filemetadata('sweep_mode')
+    fixed_angle = filemetadata('fixed_angle')
+    sweep_start_ray_index = filemetadata('sweep_start_ray_index')
+    sweep_end_ray_index = filemetadata('sweep_end_ray_index')
+    azimuth = filemetadata('azimuth')
+    elevation = filemetadata('elevation')
+    # instrument_parameters=instrument_parameters
+
+
+
+
+
+
+
+
+
+
     raw_data = _get_raw(filename)
     data=_SA_SB_decoder(raw_data)
+
+    # using pyart default configuration
+    filemetadata=pyart.config.FileMetadata('cinrad_SA_SB')
+    time=filemetadata('time')
+    time['units'] = 'seconds_since_197001010000'
+    time['calendar'] = 'stadard'
+    
+
 
 
 
